@@ -1,4 +1,6 @@
 ﻿using Panacea.Controls;
+using Panacea.Core;
+using Panacea.Modularity.UiManager;
 using Panacea.Modules.CardActions.Views;
 using Panacea.Mvvm;
 using System;
@@ -9,18 +11,13 @@ using System.Threading.Tasks;
 
 namespace Panacea.Modules.CardActions.ViewModels
 {
-    [View(typeof(Image))]
+    [View(typeof(ImageFromDemoPage))]
     public class ImageViewModel : ViewModelBase
     {
-        public object Content { get; set; }
         public string Url{ get; set; }
-        public ImageViewModel()
-        {
-        }
         public ImageViewModel(string url)
         {
             Url = url;
-            Content = new CacheImage() { ImageUrl = url };
         }
     }
 }

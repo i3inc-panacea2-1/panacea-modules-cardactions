@@ -379,7 +379,10 @@ namespace Panacea.Modules.CardActions
         }
         private void openImage(CardAction act)
         {
-            _core.GetUiManager().Navigate(new ImageViewModel(act.Settings["url"]));
+            if(_core.TryGetUiManager(out IUiManager _uiManager)){
+                ImageViewModel image = new ImageViewModel(act.Settings["url"]);
+                _uiManager.Navigate(image);
+            }
         }
         private async Task openWebAsync(CardAction act)
         {
