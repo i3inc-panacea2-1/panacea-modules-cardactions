@@ -31,6 +31,105 @@ namespace Panacea.Modules.CardActions
         private string _lastCard;
         private AuthenticationResult authResult;
 
+        private void tryGetAnything<T>(Action<T> cb, Action errorCB = null) where T : IPlugin
+        {
+            T _plug = _core.PluginLoader.GetPlugin<T>();
+            if (_plug != null)
+            {
+                cb(_plug);
+                return;
+            } else
+            {
+                if (errorCB != null)
+                {
+                    errorCB();
+                    return;
+                } else
+                {
+                    _core.Logger.Warn(this, "not Loaded");
+                }
+            }
+        }
+        private void tryGetCitrix(Action<ICitrixPlugin> cb, Action errorCB = null)
+        {
+            if (_core.TryGetCitrix(out ICitrixPlugin _citrix))
+            {
+                cb(_citrix);
+                return;
+            }
+            else
+            {
+                if (errorCB != null)
+                {
+                    errorCB();
+                    return;
+                } else
+                {
+                    _core.Logger.Error(this, "citrix not loaded");
+                }
+            }
+        }
+        private void tryGetRDC(Action<IRemoteDesktop> cb, Action errorCB = null)
+        {
+            if (_core.TryGetGetRemoteDesktopPlugin(out IRemoteDesktop _rdc))
+            {
+                cb(_rdc);
+                return;
+            }
+            else
+            {
+                if (errorCB != null)
+                {
+                    errorCB();
+                    return;
+                }
+                else
+                {
+                    _core.Logger.Error(this, "remote resktop not loaded");
+                }
+            }
+        }
+        private void tryGetImprivata(Action<IImprivataPlugin> cb, Action errorCB=null)
+        {
+            if (_core.TryGetImprivata(out IImprivataPlugin _imprivata))
+            {
+                cb(_imprivata);
+                return;
+            }
+            else
+            {
+                if (errorCB != null)
+                {
+                    errorCB();
+                    return;
+                }
+                else
+                {
+                    _core.Logger.Error(this, "citrix not loaded");
+                }
+            }
+        }
+        private async Task tryGetUiManager(Func<IUiManager, Task> cb, Action errorCB = null)
+        {
+            if (_core.TryGetUiManager(out IUiManager _ui))
+            {
+                await cb(_ui);
+                return;
+            }
+            else
+            {
+                if (errorCB != null)
+                {
+                    errorCB();
+                    return;
+                }
+                else
+                {
+                    _core.Logger.Error(this, "ui manager not loaded");
+                }
+            }
+        }
+
         public CardActionsController(PanaceaServices core)
         {
             _core = core;
@@ -94,6 +193,10 @@ namespace Panacea.Modules.CardActions
                     }
                 });
             }
+            else
+            {
+                _core.Logger.Error(this, "ui manager not loaded");
+            }
             await StartActions();
             _lastCard = e;
         }
@@ -110,12 +213,20 @@ namespace Panacea.Modules.CardActions
                         if (_currentCardCode == _lastCard) return;
                     }
                 }
+                else
+                {
+                    _core.Logger.Error(this, "citrix not loaded");
+                }
                 if (_core.TryGetGetRemoteDesktopPlugin(out IRemoteDesktop _remote))
                 {
                     if (_remote.IsRunning() && _actions.Any(a => a.Action.Contains("rdc")))
                     {
                         _remote.Disconnect();
                     }
+                }
+                else
+                {
+                    _core.Logger.Error(this, "rdc not loaded");
                 }
                 if (_currentAction >= _actions.Count) return;
                 CardAction act = _actions[_currentAction];
@@ -185,6 +296,9 @@ namespace Panacea.Modules.CardActions
                 {
                     _core.Logger.Error(this, e.StackTrace);
                 }
+            } else
+            {
+                _core.Logger.Error(this, "imprivata not loaded");
             }
         }
         private async Task rdc(CardAction act) {
@@ -194,6 +308,10 @@ namespace Panacea.Modules.CardActions
                 string password = act.Settings.ContainsKey("password") ? act.Settings["password"] : authResult.Password != null ? authResult.Password : "";
                 _rdc.Connect(username, password, "", act.Settings["ip"]);
                 await StartActions();
+            }
+            else
+            {
+                _core.Logger.Error(this, "rdc not loaded");
             }
         }
         private async Task imprivataProgram(CardAction act)
@@ -227,6 +345,10 @@ namespace Panacea.Modules.CardActions
                                     {
                                         _uiManager.Resume();
                                     }
+                                    else
+                                    {
+                                        _core.Logger.Error(this, "ui manager not loaded");
+                                    }
                                     _vmwareProcess = null;
                                 }));
                             };
@@ -250,6 +372,10 @@ namespace Panacea.Modules.CardActions
                             {
                                 _ui.Pause();
                             }
+                            else
+                            {
+                                _core.Logger.Error(this, "ui manager not loaded");
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -257,6 +383,10 @@ namespace Panacea.Modules.CardActions
                             if (_core.TryGetUiManager(out IUiManager _ui))
                             {
                                 _ui.Resume();
+                            }
+                            else
+                            {
+                                _core.Logger.Error(this, "ui manager not loaded");
                             }
                             _idleTimer?.Stop();
                             _idleTimer?.Dispose();
@@ -270,6 +400,10 @@ namespace Panacea.Modules.CardActions
                     {
                         _core.Logger.Error(this, e.StackTrace);
                     }
+                }
+                else
+                {
+                    _core.Logger.Error(this, "imprivata not loaded");
                 }
             }
             else
@@ -301,6 +435,10 @@ namespace Panacea.Modules.CardActions
                     {
                         _ui.Resume();
                     }
+                    else
+                    {
+                        _core.Logger.Error(this, "ui manager not loaded");
+                    }
                 });
             }
         }
@@ -321,6 +459,10 @@ namespace Panacea.Modules.CardActions
                 {
                     _core.Logger.Error(this, e.StackTrace);
                 }
+            }
+            else
+            {
+                _core.Logger.Error(this, "imprivata not loaded");
             }
         }
         private async Task imprivataCitrix(CardAction act)
@@ -348,6 +490,10 @@ namespace Panacea.Modules.CardActions
                     }
                 }
             }
+            else
+            {
+                _core.Logger.Error(this, "citrix not loaded");
+            }
         }
         private void citrix(CardAction act)
         {//WHAT IS THE PURPOSE OF THIS ACTION?!
@@ -359,6 +505,10 @@ namespace Panacea.Modules.CardActions
                 string domain = "";
                 string application = "";
                 _citrix.Start(username, password, domain, act.Settings["CitrixServer"], application);
+            }
+            else
+            {
+                _core.Logger.Error(this, "citrix not loaded");
             }
         }
         private async Task imprivata(CardAction act)
@@ -376,6 +526,10 @@ namespace Panacea.Modules.CardActions
                     _core.Logger.Error(this, "Imprivata auth error: " + e.StackTrace);
                 }
             }
+            else
+            {
+                _core.Logger.Error(this, "imprivata not loaded");
+            }
         }
         private void openImage(CardAction act)
         {
@@ -383,12 +537,20 @@ namespace Panacea.Modules.CardActions
                 ImageViewModel image = new ImageViewModel(act.Settings["url"]);
                 _uiManager.Navigate(image);
             }
+            else
+            {
+                _core.Logger.Error(this, "ui manager not loaded");
+            }
         }
         private async Task openWebAsync(CardAction act)
         {
             if(_core.TryGetWebBrowser(out IWebBrowserPlugin _webBrowser))
             {
                 _webBrowser.OpenUrl(act.Settings["url"]);
+            }
+            else
+            {
+                _core.Logger.Error(this, "web browser not loaded");
             }
             await StartActions();
         }
@@ -444,6 +606,10 @@ namespace Panacea.Modules.CardActions
                         _uiManager.EnableFullscreen();
                         return;
                     }
+                    else
+                    {
+                        _core.Logger.Error(this, "ui manager not loaded");
+                    }
                 }
             }
             catch (Exception ex)
@@ -473,6 +639,10 @@ namespace Panacea.Modules.CardActions
                             _uiManager.EnableFullscreen();
                             proc.Dispose();
                         }
+                        else
+                        {
+                            _core.Logger.Error(this, "ui manager not loaded");
+                        }
                     }));
                 };
                 proc.Start();
@@ -481,6 +651,10 @@ namespace Panacea.Modules.CardActions
                     _ui.ShowKeyboard();
                     _ui.DisableFullscreen();
                     proc.Dispose();
+                }
+                else
+                {
+                    _core.Logger.Error(this, "ui manager not loaded");
                 }
             }
             catch (Exception ex)
