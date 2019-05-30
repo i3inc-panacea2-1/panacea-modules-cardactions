@@ -37,7 +37,7 @@ namespace Panacea.Modules.CardActions
         }
         public Task BeginInit()
         {
-            return Task.CompletedTask;            
+            return Task.CompletedTask;
         }
         public Task EndInit()
         {
@@ -101,7 +101,6 @@ namespace Panacea.Modules.CardActions
             await StartActions();
             _lastCard = e;
         }
-
         private async Task StartActions() {
             //TODO: WHAT IS THE REAL PURPOSE OF THIS HUGE TRY-CATCH?
             try
@@ -190,7 +189,7 @@ namespace Panacea.Modules.CardActions
             {
                 try
                 {
-                    AuthenticationResult result = await _imprivata.AuthenticateCard(_currentCardCode, act.Settings["ImprivataServer"]);
+                    AuthenticationResult result = await _imprivata.AuthenticateCardAsync(_currentCardCode, castImprivataServers(act.Settings["ImprivataServers"]));
                     authResult = result;
                 }
                 catch (AuthenticationException e)
@@ -215,6 +214,10 @@ namespace Panacea.Modules.CardActions
                 _core.Logger.Error(this, "rdc not loaded");
             }
         }
+        private List<string> castImprivataServers(dynamic servers)
+        {
+            return (servers as List<object>).Cast<string>().ToList();
+        }
         private async Task imprivataProgram(CardAction act)
         {
             if (_vmwareProcess == null)
@@ -222,7 +225,7 @@ namespace Panacea.Modules.CardActions
                 if(_core.TryGetImprivata(out IImprivataPlugin _imprivata)) {
                     try
                     {
-                        AuthenticationResult result = await _imprivata.AuthenticateCard(_currentCardCode, act.Settings["ImprivataServers"]);
+                        AuthenticationResult result = await _imprivata.AuthenticateCardAsync(_currentCardCode, castImprivataServers(act.Settings["ImprivataServers"]));
                         authResult = result;
                         try
                         {
@@ -349,7 +352,8 @@ namespace Panacea.Modules.CardActions
             {
                 try
                 {
-                    AuthenticationResult result = await _imprivata.AuthenticateCard(_currentCardCode, act.Settings["ImprivataServers"]);
+                    AuthenticationResult result = await _imprivata.AuthenticateCardAsync(_currentCardCode, castImprivataServers(act.Settings["ImprivataServers"]));
+                    authResult = result;
                     var uriReplaced = uri
                                     .Replace("%username%", result.Username)
                                     .Replace("%password%", result.Password)
@@ -379,7 +383,7 @@ namespace Panacea.Modules.CardActions
                     if(_core.TryGetImprivata(out IImprivataPlugin _imprivata)){
                         try
                         {
-                            AuthenticationResult result = await _imprivata.AuthenticateCard(_currentCardCode, act.Settings["ImprivataServers"]);
+                            AuthenticationResult result = await _imprivata.AuthenticateCardAsync(_currentCardCode, castImprivataServers(act.Settings["ImprivataServers"]));
                             authResult = result;
                             string application = ""; // WHERE CAN I GET THIS?
                             _citrix.Start(result.Username, result.Password, result.Domain, act.Settings["CitrixServer"], application);
@@ -418,7 +422,7 @@ namespace Panacea.Modules.CardActions
             {
                 try
                 {
-                    AuthenticationResult result = await _imprivata.AuthenticateCard(_currentCardCode, act.Settings["ImprivataServers"]);
+                    AuthenticationResult result = await _imprivata.AuthenticateCardAsync(_currentCardCode, castImprivataServers(act.Settings["ImprivataServers"]));
                     authResult = result;
                     await StartActions();
                 }
