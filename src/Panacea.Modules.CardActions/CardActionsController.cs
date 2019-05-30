@@ -195,7 +195,7 @@ namespace Panacea.Modules.CardActions
                 }
                 catch (AuthenticationException e)
                 {
-                    _core.Logger.Error(this, e.StackTrace);
+                    _core.Logger.Error(this, e.Message);
                 }
             } else
             {
@@ -299,7 +299,7 @@ namespace Panacea.Modules.CardActions
                     }
                     catch (AuthenticationException e)
                     {
-                        _core.Logger.Error(this, e.StackTrace);
+                        _core.Logger.Error(this, e.Message);
                     }
                 }
                 else
@@ -358,7 +358,7 @@ namespace Panacea.Modules.CardActions
                 }
                 catch (AuthenticationException e)
                 {
-                    _core.Logger.Error(this, e.StackTrace);
+                    _core.Logger.Error(this, e.Message);
                 }
             }
             else
@@ -386,7 +386,7 @@ namespace Panacea.Modules.CardActions
                         }
                         catch (AuthenticationException e)
                         {
-                            _core.Logger.Error(this, "Imprivata auth error: " + e.StackTrace);
+                            _core.Logger.Error(this, "Imprivata auth error: " + e.Message);
                         }
                     }
                 }
@@ -424,7 +424,7 @@ namespace Panacea.Modules.CardActions
                 }
                 catch (AuthenticationException e)
                 {
-                    _core.Logger.Error(this, "Imprivata auth error: " + e.StackTrace);
+                    _core.Logger.Error(this, "Imprivata auth error: " + e.Message);
                 }
             }
             else
